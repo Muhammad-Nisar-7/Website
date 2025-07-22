@@ -1,44 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Muhammad Nisar</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      text-align: center;
-      padding: 0 10px;
-    }
-
-    h1 {
-      color: #ffffff;
-      letter-spacing: 0.1em;
-      animation: glow 2s ease-in-out infinite alternate;
-      font-weight: 700;
-      /* Responsive font sizing */
-      font-size: clamp(2rem, 8vw + 1rem, 6rem);
-      line-height: 1.1;
-      margin: 0;
-    }
-
-    @keyframes glow {
-      from {
-        text-shadow: 0 0 10px #00f7ff, 0 0 20px #00f7ff, 0 0 30px #00f7ff;
-      }
-      to {
-        text-shadow: 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #0ff, 0 0 50px #0ff;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Simple Pac-Man</title>
+<style>
+  body {
+    background: #000;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    height: 100vh;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    user-select: none;
+  }
+  #game {
+    display: grid;
+    grid-template-columns: repeat(15, 30px);
+    grid-template-rows: repeat(15, 30px);
+    gap: 2px;
+    background-color: #111;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  .cell {
+    width: 30px;
+    height: 30px;
+    background-color: #222;
+    position: relative;
+  }
+  .wall {
+    background-color: #0033cc;
+  }
+  .dot {
+    background-color: transparent;
+  }
+  .dot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .pacman {
+    background: yellow;
+    border-radius: 50%;
+    position: relative;
+    box-shadow:
+      inset -8px -8px 0 0 black; /* simple mouth */
+  }
+  #score {
+    color: white;
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: bold;
+  }
+</style>
 </head>
 <body>
-  <h1>Muhammad Nisar</h1>
+
+<div>
+  <div id="score">Score: 0</div>
+  <div id="game"></div>
+</div>
+
+<script>
+  const grid = document.getElementById('game');
+  const scoreDisplay = document.getElementById('score');
+  const width = 15;
+  const height = 15;
+  let score = 0;
+
+  // 0 = dot, 1 = wall, 2 = empty space (after dot eaten)
+  // Pacman initial position = 112 (row 7, col 7)
+  // Simple maze layout
+  const layout = [
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,
+    1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,
+    1,0,1,0,0,0,0,1,0,0,0,0,1,0,1,
+    1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,
+    1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,
+    1,0,1,1,0,1,1,2,1,1,0,1,1,0,1,
+    1,0,0,1,0,0,0,2,0,0,0,1,0,0,1,
+    1,0,1,1,0,1,1,1,1,1,0,1,1,0,1,
+    1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,
+    1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,
+    1,0,1,0,0,0,0,1,0,0,0,0,1,0,1,
+    1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,
+    1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+  ];
+
+  let pacmanIndex = 112; // starting position in layout array
+
+  function createBoard() {
+    grid.innerHTML = '';
+    layout.forEach((cell, i) => {
+      const div = document.createElement('div');
+      div.classList.add('cell');
+      if (cell === 1) div.classList.add('wall');
+      else if (cell === 0) div.classList.add('dot');
+      grid.appendChild(div);
+    });
+    updatePacman();
+  }
+
+  function updatePacman() {
+    // Remove previous pacman
+    document.querySelectorAll('.pacman').forEach(el => el.classList.remove('pacman'));
+    // Add pacman at current position
+    grid.children[pacmanIndex].classList.add('pacman');
+  }
+
+  function movePacman(direction) {
+    let nextIndex;
+    switch(direction) {
+      case 'ArrowUp':
+        nextIndex = pacmanIndex - width;
+        if(nextIndex < 0) return;
+        if(layout[nextIndex] !== 1) pacmanIndex = nextIndex;
+        break;
+      case 'ArrowDown':
+        nextIndex = pacmanIndex + width;
+        if(nextIndex >= width*height) return;
+        if(layout[nextIndex] !== 1) pacmanIndex = nextIndex;
+        break;
+      case 'ArrowLeft':
+        if(pacmanIndex % width === 0) return;
+        nextIndex = pacmanIndex - 1;
+        if(layout[nextIndex] !== 1) pacmanIndex = nextIndex;
+        break;
+      case 'ArrowRight':
+        if(pacmanIndex % width === width-1) return;
+        nextIndex = pacmanIndex + 1;
+        if(layout[nextIndex] !== 1) pacmanIndex = nextIndex;
+        break;
+    }
+    eatDot();
+    updatePacman();
+  }
+
+  function eatDot() {
+    if(layout[pacmanIndex] === 0) {
+      layout[pacmanIndex] = 2; // remove dot
+      score += 10;
+      scoreDisplay.textContent = `Score: ${score}`;
+      // remove dot visually
+      grid.children[pacmanIndex].classList.remove('dot');
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+      movePacman(e.key);
+    }
+  });
+
+  createBoard();
+</script>
+
 </body>
 </html>
