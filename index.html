@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Alien Fart Party 👽💨</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(#000000, #0b0f1a);
+      color: #00ffcc;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .alien {
+      font-size: 4rem;
+      text-align: center;
+      animation: dance 0.8s infinite;
+      filter: drop-shadow(0 0 10px #00ffcc);
+    }
+
+    @keyframes dance {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(5deg); }
+      50% { transform: rotate(-5deg); }
+      75% { transform: rotate(5deg); }
+      100% { transform: rotate(0deg); }
+    }
+
+    .glitch {
+      font-size: 1.2rem;
+      text-shadow: 2px 0 red, -2px 0 blue;
+      animation: glitchAnim 0.3s infinite;
+    }
+
+    @keyframes glitchAnim {
+      0% { text-shadow: 2px 0 red, -2px 0 blue; }
+      50% { text-shadow: -2px 0 red, 2px 0 blue; }
+      100% { text-shadow: 2px 0 red, -2px 0 blue; }
+    }
+
+    .fart-blast {
+      position: absolute;
+      bottom: 150px;
+      font-size: 2rem;
+      opacity: 0;
+      color: lime;
+      animation: fartBlast 1s ease-out forwards;
+    }
+
+    @keyframes fartBlast {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(2);
+      }
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 15px 30px;
+      font-size: 1.5rem;
+      background: #00ffcc;
+      border: none;
+      border-radius: 12px;
+      color: black;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ffcc;
+      transition: transform 0.1s ease;
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <div class="alien">
+    👽<br>
+    <span>/|\\</span><br>
+    <span>/ \\</span>
+    <div class="glitch">I come from Uranus</div>
+  </div>
+
+  <button onclick="fart()">💨 FART</button>
+
+  <div id="blast-container"></div>
+
+  <audio id="fart-sound" src="https://www.soundjay.com/human/sounds/fart-01.mp3" preload="auto"></audio>
+
+  <script>
+    function fart() {
+      const audio = document.getElementById('fart-sound');
+      const blast = document.createElement('div');
+      blast.className = 'fart-blast';
+      blast.innerText = '💨💨💨';
+      document.getElementById('blast-container').appendChild(blast);
+
+      audio.currentTime = 0;
+      audio.play();
+
+      setTimeout(() => {
+        blast.remove();
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
