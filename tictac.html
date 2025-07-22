@@ -12,6 +12,8 @@
       margin: 0;
       padding: 40px 0;
       text-align: center;
+      position: relative;
+      min-height: 100vh;
     }
 
     h1 {
@@ -72,18 +74,34 @@
       cursor: pointer;
       border-radius: 5px;
     }
+
+    /* Credit label */
+    #credit {
+      position: fixed;
+      bottom: 5px;
+      right: 10px;
+      font-size: 0.75rem;
+      color: #888;
+      font-style: italic;
+      opacity: 0.6;
+      user-select: none;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <h1>Tic Tac Toe</h1>
   <div class="board" id="board"></div>
-  <div class="status" id="status">Player X's turn</div>
+  <div class="status" id="status">Loading...</div>
   <button onclick="resetGame()">Restart Game</button>
+
+  <!-- Credit -->
+  <div id="credit">Game by Nisar</div>
 
   <script>
     const board = document.getElementById("board");
     const statusText = document.getElementById("status");
-    let currentPlayer = "X";
+    let currentPlayer;
     let cells = [];
 
     function checkWinner() {
@@ -113,24 +131,51 @@
 
     function handleClick(e) {
       const cell = e.target;
-      if (cell.textContent !== "") return;
-      cell.textContent = currentPlayer;
-      cell.classList.add("taken", currentPlayer === "X" ? "player-1" : "player-2");
+      if (cell.textContent || checkWinner()) return;
+
+      makeMove(cell, currentPlayer);
+
       if (!checkWinner()) {
         currentPlayer = currentPlayer === "X" ? "O" : "X";
         statusText.textContent = `Player ${currentPlayer}'s turn`;
+
+        if (currentPlayer === "O") {
+          setTimeout(computerMove, 300);
+        }
+      }
+    }
+
+    function makeMove(cell, player) {
+      cell.textContent = player;
+      cell.classList.add("taken", player === "X" ? "player-1" : "player-2");
+    }
+
+    function computerMove() {
+      const emptyCells = cells.filter(cell => !cell.textContent);
+      if (emptyCells.length === 0 || checkWinner()) return;
+      const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      makeMove(randomCell, "O");
+
+      if (!checkWinner()) {
+        currentPlayer = "X";
+        statusText.textContent = `Player X's turn`;
       }
     }
 
     function resetGame() {
       board.innerHTML = "";
-      currentPlayer = "X";
-      statusText.textContent = `Player X's turn`;
+      cells = [];
       createBoard();
+
+      currentPlayer = Math.random() < 0.5 ? "X" : "O";
+      statusText.textContent = `Player ${currentPlayer}'s turn`;
+
+      if (currentPlayer === "O") {
+        setTimeout(computerMove, 400);
+      }
     }
 
     function createBoard() {
-      cells = [];
       for (let i = 0; i < 9; i++) {
         const cell = document.createElement("div");
         cell.className = "cell";
@@ -140,7 +185,7 @@
       }
     }
 
-    createBoard();
+    resetGame();
   </script>
 </body>
 </html>
