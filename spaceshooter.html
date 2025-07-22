@@ -40,12 +40,61 @@
       text-shadow: 0 0 10px red;
       display: none;
     }
+
+    #controls {
+      margin-top: 15px;
+      display: none; /* hidden by default for desktop */
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn {
+      background: #00ffff;
+      border: none;
+      color: black;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #00ffff;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Show controls only on mobile */
+    @media (max-width: 600px) {
+      #controls {
+        display: flex;
+      }
+    }
+
+    /* Credit text */
+    #credit {
+      position: fixed;
+      bottom: 5px;
+      right: 10px;
+      font-size: 0.75rem;
+      color: #888;
+      font-style: italic;
+      opacity: 0.6;
+    }
   </style>
 </head>
 <body>
   <h2>🚀 Space Shooter</h2>
   <canvas id="shooter" width="300" height="400"></canvas>
-  <div id="gameOverMessage">Game Over<br><small>Press Enter to Restart</small></div>
+  <div id="gameOverMessage">Game Over<br><small>Press Enter or Tap Restart</small></div>
+
+  <!-- Mobile-only controls -->
+  <div id="controls">
+    <button class="btn" id="leftBtn">← Left</button>
+    <button class="btn" id="shootBtn">🔥 Shoot</button>
+    <button class="btn" id="rightBtn">→ Right</button>
+    <button class="btn" id="restartBtn">🔁 Restart</button>
+  </div>
+
+  <!-- Credit -->
+  <div id="credit">Game by Nisar</div>
 
   <script>
     const canvas = document.getElementById("shooter");
@@ -65,15 +114,27 @@
     }
 
     document.addEventListener("keydown", e => {
-      if (!gameRunning && e.key === "Enter") {
-        resetGame();
-      }
+      if (!gameRunning && e.key === "Enter") resetGame();
 
       if (gameRunning) {
         if (e.key === "ArrowLeft" && x > 0) x -= 10;
         if (e.key === "ArrowRight" && x < 280) x += 10;
         if (e.key === " ") bullets.push({x: x + 7.5, y: 350});
       }
+    });
+
+    // Mobile button controls
+    document.getElementById("leftBtn").addEventListener("click", () => {
+      if (gameRunning && x > 0) x -= 10;
+    });
+    document.getElementById("rightBtn").addEventListener("click", () => {
+      if (gameRunning && x < 280) x += 10;
+    });
+    document.getElementById("shootBtn").addEventListener("click", () => {
+      if (gameRunning) bullets.push({x: x + 7.5, y: 350});
+    });
+    document.getElementById("restartBtn").addEventListener("click", () => {
+      resetGame();
     });
 
     function drawShip() {
@@ -156,3 +217,6 @@
   </script>
 </body>
 </html>
+
+
+
