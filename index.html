@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Muhammad Nisar</title>
   <style>
     body {
@@ -12,15 +12,20 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding: 0 10px;
     }
 
     h1 {
-      font-size: 80px;
       color: #ffffff;
-      letter-spacing: 8px;
-      position: relative;
+      letter-spacing: 0.1em;
       animation: glow 2s ease-in-out infinite alternate;
+      font-weight: 700;
+      /* Responsive font sizing */
+      font-size: clamp(2rem, 8vw + 1rem, 6rem);
+      line-height: 1.1;
+      margin: 0;
     }
 
     @keyframes glow {
