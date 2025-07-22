@@ -1,170 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Simple Pac-Man</title>
-<style>
-  body {
-    background: #000;
-    display: flex;
-    justify-content: center;
-    margin: 0;
-    height: 100vh;
-    align-items: center;
-    font-family: Arial, sans-serif;
-    user-select: none;
-  }
-  #game {
-    display: grid;
-    grid-template-columns: repeat(15, 30px);
-    grid-template-rows: repeat(15, 30px);
-    gap: 2px;
-    background-color: #111;
-    padding: 10px;
-    border-radius: 10px;
-  }
-  .cell {
-    width: 30px;
-    height: 30px;
-    background-color: #222;
-    position: relative;
-  }
-  .wall {
-    background-color: #0033cc;
-  }
-  .dot {
-    background-color: transparent;
-  }
-  .dot::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 6px;
-    height: 6px;
-    background: #fff;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-  }
-  .pacman {
-    background: yellow;
-    border-radius: 50%;
-    position: relative;
-    box-shadow:
-      inset -8px -8px 0 0 black; /* simple mouth */
-  }
-  #score {
-    color: white;
-    font-size: 18px;
-    margin-bottom: 15px;
-    font-weight: bold;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      background-color: #1a1a2e;
+      color: #b6b5ca;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 40px 0;
+      text-align: center;
+    }
+
+    h1 {
+      font-weight: 400;
+      margin-bottom: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      justify-content: center;
+      margin: 0 auto;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #3d4250;
+      color: white;
+      font-size: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s;
+    }
+
+    .cell:hover {
+      background-color: #50566e;
+    }
+
+    .cell.taken {
+      cursor: default;
+    }
+
+    .player-1 {
+      color: #dc685a;
+    }
+
+    .player-2 {
+      color: #ecaf4f;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #ecaf4f;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
 </head>
 <body>
+  <h1>Tic Tac Toe</h1>
+  <div class="board" id="board"></div>
+  <div class="status" id="status">Player X's turn</div>
+  <button onclick="resetGame()">Restart Game</button>
 
-<div>
-  <div id="score">Score: 0</div>
-  <div id="game"></div>
-</div>
+  <script>
+    const board = document.getElementById("board");
+    const statusText = document.getElementById("status");
+    let currentPlayer = "X";
+    let cells = [];
 
-<script>
-  const grid = document.getElementById('game');
-  const scoreDisplay = document.getElementById('score');
-  const width = 15;
-  const height = 15;
-  let score = 0;
-
-  // 0 = dot, 1 = wall, 2 = empty space (after dot eaten)
-  // Pacman initial position = 112 (row 7, col 7)
-  // Simple maze layout
-  const layout = [
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,
-    1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,
-    1,0,1,0,0,0,0,1,0,0,0,0,1,0,1,
-    1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,
-    1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,
-    1,0,1,1,0,1,1,2,1,1,0,1,1,0,1,
-    1,0,0,1,0,0,0,2,0,0,0,1,0,0,1,
-    1,0,1,1,0,1,1,1,1,1,0,1,1,0,1,
-    1,0,0,0,0,1,0,0,0,1,0,0,0,0,1,
-    1,0,1,1,1,1,0,1,0,1,1,1,1,0,1,
-    1,0,1,0,0,0,0,1,0,0,0,0,1,0,1,
-    1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,
-    1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-  ];
-
-  let pacmanIndex = 112; // starting position in layout array
-
-  function createBoard() {
-    grid.innerHTML = '';
-    layout.forEach((cell, i) => {
-      const div = document.createElement('div');
-      div.classList.add('cell');
-      if (cell === 1) div.classList.add('wall');
-      else if (cell === 0) div.classList.add('dot');
-      grid.appendChild(div);
-    });
-    updatePacman();
-  }
-
-  function updatePacman() {
-    // Remove previous pacman
-    document.querySelectorAll('.pacman').forEach(el => el.classList.remove('pacman'));
-    // Add pacman at current position
-    grid.children[pacmanIndex].classList.add('pacman');
-  }
-
-  function movePacman(direction) {
-    let nextIndex;
-    switch(direction) {
-      case 'ArrowUp':
-        nextIndex = pacmanIndex - width;
-        if(nextIndex < 0) return;
-        if(layout[nextIndex] !== 1) pacmanIndex = nextIndex;
-        break;
-      case 'ArrowDown':
-        nextIndex = pacmanIndex + width;
-        if(nextIndex >= width*height) return;
-        if(layout[nextIndex] !== 1) pacmanIndex = nextIndex;
-        break;
-      case 'ArrowLeft':
-        if(pacmanIndex % width === 0) return;
-        nextIndex = pacmanIndex - 1;
-        if(layout[nextIndex] !== 1) pacmanIndex = nextIndex;
-        break;
-      case 'ArrowRight':
-        if(pacmanIndex % width === width-1) return;
-        nextIndex = pacmanIndex + 1;
-        if(layout[nextIndex] !== 1) pacmanIndex = nextIndex;
-        break;
+    function checkWinner() {
+      const combos = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+      ];
+      for (let combo of combos) {
+        const [a, b, c] = combo;
+        if (
+          cells[a].textContent &&
+          cells[a].textContent === cells[b].textContent &&
+          cells[a].textContent === cells[c].textContent
+        ) {
+          statusText.textContent = `Player ${cells[a].textContent} wins!`;
+          cells.forEach(cell => cell.classList.add("taken"));
+          return true;
+        }
+      }
+      if ([...cells].every(cell => cell.textContent)) {
+        statusText.textContent = "It's a draw!";
+        return true;
+      }
+      return false;
     }
-    eatDot();
-    updatePacman();
-  }
 
-  function eatDot() {
-    if(layout[pacmanIndex] === 0) {
-      layout[pacmanIndex] = 2; // remove dot
-      score += 10;
-      scoreDisplay.textContent = `Score: ${score}`;
-      // remove dot visually
-      grid.children[pacmanIndex].classList.remove('dot');
+    function handleClick(e) {
+      const cell = e.target;
+      if (cell.textContent !== "") return;
+      cell.textContent = currentPlayer;
+      cell.classList.add("taken", currentPlayer === "X" ? "player-1" : "player-2");
+      if (!checkWinner()) {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        statusText.textContent = `Player ${currentPlayer}'s turn`;
+      }
     }
-  }
 
-  document.addEventListener('keydown', e => {
-    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
-      e.preventDefault();
-      movePacman(e.key);
+    function resetGame() {
+      board.innerHTML = "";
+      currentPlayer = "X";
+      statusText.textContent = `Player X's turn`;
+      createBoard();
     }
-  });
 
-  createBoard();
-</script>
+    function createBoard() {
+      cells = [];
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.addEventListener("click", handleClick);
+        board.appendChild(cell);
+        cells.push(cell);
+      }
+    }
 
+    createBoard();
+  </script>
 </body>
 </html>
