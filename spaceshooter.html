@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Space Shooter</title>
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at center, #000010 0%, #000000 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: white;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: 2em;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff;
+    }
+
+    canvas {
+      border: 2px solid #00ffff;
+      background: black;
+      box-shadow: 0 0 20px #00ffff;
+    }
+
+    #gameOverMessage {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2em;
+      color: red;
+      text-shadow: 0 0 10px red;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>🚀 Space Shooter</h2>
+  <canvas id="shooter" width="300" height="400"></canvas>
+  <div id="gameOverMessage">Game Over<br><small>Press Enter to Restart</small></div>
+
+  <script>
+    const canvas = document.getElementById("shooter");
+    const ctx = canvas.getContext("2d");
+    const gameOverMessage = document.getElementById("gameOverMessage");
+
+    let x, bullets, enemies, gameRunning, score;
+
+    function resetGame() {
+      x = 140;
+      bullets = [];
+      enemies = [{x: Math.random() * 280, y: 0}];
+      score = 0;
+      gameRunning = true;
+      gameOverMessage.style.display = "none";
+      draw();
+    }
+
+    document.addEventListener("keydown", e => {
+      if (!gameRunning && e.key === "Enter") {
+        resetGame();
+      }
+
+      if (gameRunning) {
+        if (e.key === "ArrowLeft" && x > 0) x -= 10;
+        if (e.key === "ArrowRight" && x < 280) x += 10;
+        if (e.key === " ") bullets.push({x: x + 7.5, y: 350});
+      }
+    });
+
+    function drawShip() {
+      ctx.fillStyle = "#00ff00";
+      ctx.shadowColor = "#00ff00";
+      ctx.shadowBlur = 10;
+      ctx.fillRect(x, 360, 20, 20);
+      ctx.shadowBlur = 0;
+    }
+
+    function drawBullets() {
+      ctx.fillStyle = "yellow";
+      bullets.forEach(b => {
+        b.y -= 5;
+        ctx.fillRect(b.x, b.y, 5, 10);
+      });
+      bullets = bullets.filter(b => b.y > 0);
+    }
+
+    function checkCollisions() {
+      bullets.forEach((b, bi) => {
+        enemies.forEach((e, ei) => {
+          if (
+            b.x < e.x + 20 &&
+            b.x + 5 > e.x &&
+            b.y < e.y + 20 &&
+            b.y + 10 > e.y
+          ) {
+            enemies.splice(ei, 1);
+            bullets.splice(bi, 1);
+            score += 1;
+          }
+        });
+      });
+    }
+
+    function drawEnemies() {
+      ctx.fillStyle = "red";
+      enemies.forEach(e => {
+        e.y += 2;
+        ctx.fillRect(e.x, e.y, 20, 20);
+
+        if (e.y + 20 >= 360 && e.x < x + 20 && e.x + 20 > x) {
+          gameOver();
+        }
+      });
+
+      if (Math.random() < 0.02) {
+        enemies.push({x: Math.random() * 280, y: 0});
+      }
+
+      enemies = enemies.filter(e => e.y < 400);
+    }
+
+    function drawScore() {
+      ctx.fillStyle = "white";
+      ctx.font = "16px Arial";
+      ctx.fillText("Score: " + score, 10, 20);
+    }
+
+    function gameOver() {
+      gameRunning = false;
+      gameOverMessage.style.display = "block";
+    }
+
+    function draw() {
+      if (!gameRunning) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawShip();
+      drawBullets();
+      drawEnemies();
+      checkCollisions();
+      drawScore();
+
+      requestAnimationFrame(draw);
+    }
+
+    resetGame();
+  </script>
+</body>
+</html>
