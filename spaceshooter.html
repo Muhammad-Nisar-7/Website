@@ -43,9 +43,14 @@
 
     #controls {
       margin-top: 15px;
-      display: none; /* hidden by default for desktop */
-      flex-wrap: wrap;
-      justify-content: center;
+      display: none;
+      flex-direction: column; /* vertical stack */
+      align-items: center;
+      gap: 10px;
+    }
+
+    #control-row {
+      display: flex;
       gap: 10px;
     }
 
@@ -61,7 +66,7 @@
       user-select: none;
     }
 
-    /* Show controls only on mobile */
+    /* Show controls only on small screens (phones) */
     @media (max-width: 600px) {
       #controls {
         display: flex;
@@ -77,6 +82,8 @@
       color: #888;
       font-style: italic;
       opacity: 0.6;
+      user-select: none;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -87,9 +94,11 @@
 
   <!-- Mobile-only controls -->
   <div id="controls">
-    <button class="btn" id="leftBtn">← Left</button>
-    <button class="btn" id="shootBtn">🔥 Shoot</button>
-    <button class="btn" id="rightBtn">→ Right</button>
+    <div id="control-row">
+      <button class="btn" id="leftBtn">← Left</button>
+      <button class="btn" id="shootBtn">🔥 Shoot</button>
+      <button class="btn" id="rightBtn">→ Right</button>
+    </div>
     <button class="btn" id="restartBtn">🔁 Restart</button>
   </div>
 
@@ -123,7 +132,7 @@
       }
     });
 
-    // Mobile button controls
+    // Mobile control buttons
     document.getElementById("leftBtn").addEventListener("click", () => {
       if (gameRunning && x > 0) x -= 10;
     });
@@ -174,7 +183,7 @@
     function drawEnemies() {
       ctx.fillStyle = "red";
       enemies.forEach(e => {
-        e.y += 2;
+        e.y += 1.2;  // slower enemy speed
         ctx.fillRect(e.x, e.y, 20, 20);
 
         if (e.y + 20 >= 360 && e.x < x + 20 && e.x + 20 > x) {
@@ -217,6 +226,3 @@
   </script>
 </body>
 </html>
-
-
-
